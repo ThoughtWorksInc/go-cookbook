@@ -6,8 +6,8 @@ when 'debian'
   include_recipe 'apt'
 
   apt_repository 'thoughtworks' do
-    uri 'http://download.go.cd/gocd-deb/'
-    components ['/']
+    uri node['go']['apt_repository_url']
+    components node['go']['apt_repository_components']
   end
 
   package_options = '--force-yes'
@@ -15,7 +15,7 @@ when 'rhel','fedora'
   include_recipe 'yum'
 
   yum_repository 'thoughtworks' do
-    baseurl 'http://download.go.cd/gocd-rpm'
+    baseurl node['go']['yum_repository_url']
     gpgcheck false
   end
 end
@@ -107,7 +107,8 @@ end
     variables(:go_server_host => go_server_host, 
       :go_server_port => '8153', 
       :java_home => node['java']['java_home'],
-      :work_dir => "/var/lib/go-agent#{suffix}")
+      :work_dir => "/var/lib/go-agent#{suffix}",
+      :go_agent_version => node['go']['version'])
   end
   
   template "/usr/share/go-agent/agent#{suffix}.sh" do

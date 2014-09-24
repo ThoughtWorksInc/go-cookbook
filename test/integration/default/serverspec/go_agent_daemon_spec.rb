@@ -16,4 +16,12 @@ describe "GO Agent Config" do
   	it { should contain 'agent.auto.register.key=default_auto_registration_key' }
   end
 
+describe file('/etc/default/go-agent') do 
+  	it {should be_file}
+  	it {should be_readable}
+  	it { should contain 'GO Agent version 14.2.0-377' }
+  end
+
 end
+
+

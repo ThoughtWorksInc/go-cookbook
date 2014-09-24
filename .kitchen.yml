@@ -26,3 +26,11 @@ suites:
   attributes: {"go":{"agent":{"auto_register_resources":["a", "b", "c"]}}}
   excludes:
     - centos-6.4
+- name: agent-v13
+  run_list: ['recipe[go::agent_linux]']
+  attributes: 
+    go:
+      version: '13.1.1-16714'
+      apt_repo: "http://download01.thoughtworks.com/go/debian"
+      apt_components": 
+        - 'contrib/'
