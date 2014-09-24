@@ -17,3 +17,18 @@ default['go']['version']                       = '14.2.0-377'
 unless platform?('windows')
   default['go']['agent']['java_home']             = '/usr/bin/java'
 end
+
+
+#set to old repo if version is 13
+if node['go']['version'] =~ /13\./
+	default['go']['apt_repository_url'] = 'http://download01.thoughtworks.com/go/debian'
+	default['go']['apt_repository_components'] = ['contrib/']
+
+	default['go']['yum_repository_url'] = 'http://download01.thoughtworks.com/go/yum/no-arch'
+else 
+	default['go']['apt_repository_url'] = 'http://download.go.cd/gocd-deb/'
+	default['go']['apt_repository_components'] = ['/']
+
+	default['go']['yum_repository_url'] = 'http://download.go.cd/gocd-rpm'
+end
+
