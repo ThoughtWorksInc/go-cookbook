@@ -17,7 +17,7 @@ It's primarily tested on newer versions of Ubuntu, but should work on both Debia
 go::server will install and start an empty Go server.
 
 Before running chef-client with this recipe , ensure you have the
-following setting on your server else server start will fail
+following setting on your ci-server else Go server start will fail
 
 $ hostname 
 <server-hostname>
