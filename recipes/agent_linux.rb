@@ -1,38 +1,40 @@
 # Cookbook Name:: go
 # Recipe:: agent_linux
 
-case node['platform_family']
-when 'debian'
-  include_recipe 'apt'
-
-  apt_repository 'thoughtworks' do
-    uri 'http://dl.bintray.com/gocd/gocd-deb/'
-    keyserver "pgp.mit.edu"
-    key "0x9149B0A6173454C7"
-    components ['/']
-  end
-
-  package_options = '--force-yes'
-when 'rhel','fedora'
-  include_recipe 'yum'
-
-  yum_repository 'thoughtworks' do
-    baseurl 'http://dl.bintray.com/gocd/gocd-rpm/'
-    gpgcheck false
-  end
-end
+include_recipe 'go::repository'
 
 include_recipe 'java'
 
-package_url             = node['gocd']['agent']['package_url']
-package_checksum        = node['gocd']['agent']['package_checksum']
 go_server_autoregister  = node['gocd']['agent']['auto_register']
 autoregister_key        = node['gocd']['agent']['auto_register_key']
 server_search_query     = node['gocd']['agent']['server_search_query']
 
-package "go-agent" do
-  version node['gocd']['version']
-  options package_options
+case node['gocd']['install_method']
+when 'repository'
+  include_recipe 'go::repository'
+  package_options = node['gocd']['repository']['apt']['package_options'] if node['platform_family'] == 'debian'
+  package "go-agent" do
+    version node['gocd']['version']
+    options package_options
+  end
+when 'package_file'
+  remote_file node['gocd']['agent']['package_file']['filename'] do
+    path node['gocd']['agent']['package_file']['path']
+    source node['gocd']['agent']['package_file']['url']
+    mode 0644
+  end
+  case node['platform_family']
+  when 'debian'
+    dpkg_package 'go-agent' do
+      source node['gocd']['agent']['package_file']['path']
+    end
+  when 'rhel','fedora'
+    rpm_package 'go-agent' do
+      source node['gocd']['agent']['package_file']['path']
+    end
+  end
+else
+  fail "Unknown install method - '#{node['gocd']['install_method']}'"
 end
 
 # If running under solo or user specifed the server host, try and use that
@@ -91,7 +93,7 @@ end
   else
     suffix = "-#{i}"
   end
-  
+
   template "/etc/init.d/go-agent#{suffix}" do
     # <%= @go_agent_instance -%>
     source 'go-agent-service.erb'
@@ -106,12 +108,12 @@ end
     mode '0644'
     owner 'go'
     group 'go'
-    variables(:go_server_host => go_server_host, 
-      :go_server_port => '8153', 
+    variables(:go_server_host => go_server_host,
+      :go_server_port => '8153',
       :java_home => node['java']['java_home'],
       :work_dir => "#{node['gocd']['agent']['work_dir_path']}/go-agent#{suffix}")
   end
-  
+
   template "/usr/share/go-agent/agent#{suffix}.sh" do
     source 'go-agent-sh.erb'
     mode '0755'
@@ -139,7 +141,7 @@ end
     owner 'go'
     group 'go'
   end
-  
+
   autoregister_resources = []
   node['gocd']['agent']['auto_register_resources'].each do |resource_key|
     autoregister_resources.push(resource_key)

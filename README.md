@@ -1,10 +1,44 @@
 # Go Cookbook
 
 Hello friend! This cookbook is here to help you setup Go servers and agents
-in an automated way. 
+in an automated way.
 
 It's primarily tested on newer versions of Ubuntu, but should work on both Debian and Red Hat based distributions.  There is also basic support for agents on Windows (enhancements appreciated!).
 
+## Install method
+
+### Repository
+
+By default installation source is done from apt or yum repositories from official sources at http://www.go.cd/download/.
+
+The **apt** repository can be overriden by changing any these attributes:
+```ruby
+default['gocd']['repository']['apt']['uri'] = 'http://download.go.cd/gocd-deb/'
+default['gocd']['repository']['apt']['components'] = [ '/' ]
+default['gocd']['repository']['apt']['package_options'] = '--force-yes'
+default['gocd']['repository']['apt']['keyserver'] = 'pgp.mit.edu'
+default['gocd']['repository']['apt']['key'] = '0x9149B0A6173454C7'
+```
+The **yum** repository can be overriden by changing any these attributes:
+```ruby
+default['gocd']['repository']['yum']['baseurl'] = 'http://download.go.cd/gocd-rpm'
+default['gocd']['repository']['yum']['gpgcheck'] = false
+```
+
+### From remote file
+
+Cookbook can skip adding repository and install Go server or agent by downloading a remote file and install it directly via `dpkg` or `rpm`.
+
+Change install method to 'package_file':
+```ruby
+node['gocd']['install_method'] = 'remote_file'
+```
+
+And assign base url where packages are available for download
+```ruby
+node['gocd']['package_file']['baseurl'] = 'http://my/custom/url'
+```
+The final download URL of file is built based on platform and `node['gocd']['version']`. E.g. `http://my/custom/url/go-agent-15.2.0-2520.deb`
 
 ## Ideas
 
@@ -33,10 +67,11 @@ You can use Vagrant and your own chef bootstrapped virtual box base image and va
 go recipe will install and configure a Windows Go agent on a Windows os, and associate it with an existing Go server.  Does not automatically register agent.
 
 Overrides available for go::agent_windows
-[:gocd][:agent][:server_host] - hostname or ip of Go server
-[:gocd][:agent][:install_path] - installation path for Go agent
-[:gocd][:agent][:java_home] - java home path if using existing java installation
-[:gocd][:agent][:download_url] - msi for agent install, if left empty will build download url using [:gocd][:version]
+ * `node[:gocd][:agent][:server_host]` - hostname or ip of Go server
+ * `node[:gocd][:agent][:install_path]` - installation path for Go agent
+ * `node[:gocd][:agent][:java_home]` - java home path if using existing java installation
+ * `node[:gocd][:agent][:download_url]` - msi for agent install, if left empty will build download url using `node[:gocd][:version]`
+
 
 # Authors
 Author:: Chris Kozak (<ckozak@gmail.com>)
