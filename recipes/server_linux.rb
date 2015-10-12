@@ -1,46 +1,50 @@
-case node['platform_family']
-when 'debian'
-  include_recipe 'apt'
-
-  apt_repository 'thoughtworks' do
-    uri 'http://download.go.cd/gocd-deb/'
-    components ['/']
-  end
-
-  package_options = '--force-yes'
-when 'rhel','fedora'
-  include_recipe 'yum'
-
-  yum_repository 'thoughtworks' do
-    baseurl 'http://download.go.cd/gocd-rpm'
-    gpgcheck false
-  end
-end
-
 include_recipe 'java'
 
 package 'unzip'
 
-package "go-server" do
-  version node['gocd']['version']
-  options package_options
-  notifies :start, 'service[go-server]', :immediately
+case node['gocd']['install_method']
+when 'repository'
+  include_recipe 'go::repository'
+  package_options = node['gocd']['repository']['apt']['package_options'] if node['platform_family'] == 'debian'
+  package "go-server" do
+    version node['gocd']['version']
+    options package_options
+    notifies :start, 'service[go-server]', :immediately
+  end
+when 'package_file'
+  remote_file node['gocd']['server']['package_file']['filename'] do
+    path node['gocd']['server']['package_file']['path']
+    source node['gocd']['server']['package_file']['url']
+    mode 0644
+  end
+  case node['platform_family']
+  when 'debian'
+    dpkg_package 'go-server' do
+      source node['gocd']['server']['package_file']['path']
+    end
+  when 'rhel','fedora'
+    rpm_package 'go-server' do
+      source node['gocd']['server']['package_file']['path']
+    end
+  end
+else
+  fail "Unknown install method - '#{node['gocd']['install_method']}'"
 end
 
-# If we're upgrading an existing Go Server then leave the configuration and such intact. 
+# If we're upgrading an existing Go Server then leave the configuration and such intact.
 # If it's a new node, and a SVN backup URL is specified then restore/overwrite any existing configuration.
 
-# Detection isn't based on the <license> element as Go-Community edition has no license. 
+# Detection isn't based on the <license> element as Go-Community edition has no license.
 # We look for at least one <pipelines> element, with the assumption that if you have a backup you have at least one pipeline.
 
-if (::File.exists?('/etc/go/cruise-config.xml') and ::File.readlines('/etc/go/cruise-config.xml').grep(/<pipelines/).length > 0) 
+if (::File.exists?('/etc/go/cruise-config.xml') and ::File.readlines('/etc/go/cruise-config.xml').grep(/<pipelines/).length > 0)
   skip_backup = true
   Chef::Log.warn("Existing configuration detected. Restore skipped.")
 else
   Chef::Log.warn("New install detected.")
   skip_backup = false
   restore_go_config = false
-  if (node['gocd']['backup_path'] && !node['gocd']['backup_path'].strip.empty?) 
+  if (node['gocd']['backup_path'] && !node['gocd']['backup_path'].strip.empty?)
     Chef::Log.warn("Backup URL specified. Configuration will be restored.")
     restore_go_config = true
   end
