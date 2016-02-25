@@ -1,6 +1,8 @@
 name             "gocd"
 description      "Installs/Configures Go servers and agents"
 version          "1.1.1"
+maintainer       "Ketan Padegaonkar"
+maintainer_email "ketanpadegaonkar@gmail.com"
 
 supports "ubuntu"
 supports "centos"
