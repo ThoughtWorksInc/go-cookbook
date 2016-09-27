@@ -3,7 +3,7 @@ default['gocd']['download']['package_file']['baseurl'] = 'https://download.go.cd
 
 case node['gocd']['install_method']
 when 'package_file'
-	default['gocd']['version'] = '16.9.0'
+	default['gocd']['version'] = '16.9.0-4001'
 end
 
 version = node['gocd']['version']
