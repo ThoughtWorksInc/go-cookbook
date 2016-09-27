@@ -1,4 +1,4 @@
-default['gocd']['install_method'] = 'repository'
+default['gocd']['install_method'] = 'package_file'
 default['gocd']['download']['baseurl'] = 'https://download.go.cd'
 
 default['gocd']['repository']['apt']['uri'] = node['gocd']['download']['baseurl']
@@ -16,7 +16,7 @@ case node['gocd']['install_method']
 when 'repository'
 # version = nil so just pick latest available
 else
-  default['gocd']['version'] = '16.2.1-3027'
+  default['gocd']['version'] = '16.0.9'
 end
 
 version = node['gocd']['version']
