@@ -1,4 +1,4 @@
-default['gocd']['install_method'] = 'package_file'
+default['gocd']['install_method'] = 'repository'
 default['gocd']['download']['package_file']['baseurl'] = 'https://download.go.cd'
 
 case node['gocd']['install_method']
