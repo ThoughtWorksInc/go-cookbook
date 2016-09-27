@@ -11,7 +11,7 @@ os_dir = nil
 
 case node['platform_family']
 when 'debian'
-  default['gocd']['server']['package_file']['filename'] = "go-server_#{version}.deb"
+  default['gocd']['server']['package_file']['filename'] = "go-server_#{version}_all.deb"
   default['gocd']['agent']['package_file']['filename'] = "go-agent-#{version}.deb"
   default['gocd']['package_file']['baseurl'] = node['gocd']['download']['baseurl']
   os_dir = 'deb'
