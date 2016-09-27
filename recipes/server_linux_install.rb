@@ -27,6 +27,8 @@ when 'package_file'
   when 'debian'
     dpkg_package 'go-server' do
       source node['gocd']['server']['package_file']['path']
+      action :install
+      options "--force-confnew"
       notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
     end
   when 'rhel','fedora'
