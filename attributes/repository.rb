@@ -16,7 +16,7 @@ case node['gocd']['install_method']
 when 'repository'
 # version = nil so just pick latest available
 else
-  default['gocd']['version'] = '16.9.0-4001' 
+  default['gocd']['version'] = '16.10.0-4131' 
 end
 
 version = node['gocd']['version']
