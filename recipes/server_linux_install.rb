@@ -17,6 +17,7 @@ when 'repository'
     options package_options
     notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
   end
+
 when 'package_file'
   remote_file node['gocd']['server']['package_file']['filename'] do
     path node['gocd']['server']['package_file']['path']
@@ -27,6 +28,7 @@ when 'package_file'
   when 'debian'
     dpkg_package 'go-server' do
       source node['gocd']['server']['package_file']['path']
+      version '16.10.0-4131'
       action :install
       options "--force-confnew"
       notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
