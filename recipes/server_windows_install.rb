@@ -1,4 +1,4 @@
-package_path = File.join(Chef::Config[:file_cache_path],go_server_package_name)
+package_path = File.join(Chef::Config[:file_cache_path], go_server_package_name)
 
 remote_file go_server_package_name do
   path package_path
@@ -7,7 +7,7 @@ end
 
 opts = []
 opts << '/S'
-opts << "/D='#{node['gocd']['server']['work_dir'].gsub('/', '\\')}'"
+opts << "/D='#{node['gocd']['server']['work_dir'].tr('/', '\\')}'"
 
 if defined?(Chef::Provider::Package::Windows)
   package 'Go Server' do

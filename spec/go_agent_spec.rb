@@ -1,5 +1,7 @@
 require 'spec_helper'
 
+# This block depends on the number of specs we'll have.
+# rubocop:disable Metrics/BlockLength
 describe 'gocd::agent' do
   shared_examples_for :agent_recipe_linux do
     it_behaves_like :agent_linux_install
@@ -24,21 +26,21 @@ describe 'gocd::agent' do
       expect(chef_run).to create_directory('/var/lib/go-agent').with(
         owner: 'go',
         group: 'go',
-        mode:  0755
+        mode:  0o755
       )
     end
     it 'creates go agent log directory' do
       expect(chef_run).to create_directory('/var/log/go-agent').with(
         owner: 'go',
         group: 'go',
-        mode:  0755
+        mode:  0o755
       )
     end
     it 'creates go agent config directory' do
       expect(chef_run).to create_directory('/var/lib/go-agent/config').with(
         owner: 'go',
         group: 'go',
-        mode:  0700
+        mode:  0o700
       )
     end
   end
@@ -167,27 +169,27 @@ describe 'gocd::agent' do
     end
     it 'creates go-agent-1 configuration' do
       expect(chef_run).to render_file('/etc/default/go-agent-1')
-      #TODO check content
+      # TODO: check content
     end
     it 'creates additional go agent workspace directory' do
       expect(chef_run).to create_directory('/var/lib/go-agent-1').with(
         owner: 'go',
         group: 'go',
-        mode:  0755
+        mode:  0o755
       )
     end
     it 'creates additional go agent log directory' do
       expect(chef_run).to create_directory('/var/log/go-agent-1').with(
         owner: 'go',
         group: 'go',
-        mode:  0755
+        mode:  0o755
       )
     end
     it 'creates additional go agent config directory' do
       expect(chef_run).to create_directory('/var/lib/go-agent-1/config').with(
         owner: 'go',
         group: 'go',
-        mode:  0700
+        mode:  0o700
       )
     end
     it 'configures additional go-agent service' do
@@ -217,7 +219,8 @@ describe 'gocd::agent' do
     it_behaves_like :agent_recipe_linux
     it 'downloads go-agent .deb from remote URL' do
       expect(chef_run).to create_remote_file('go-agent-stable.deb').with(
-        source: 'https://download.gocd.io/binaries/16.2.1-3027/deb/go-agent-16.2.1-3027.deb')
+        source: 'https://download.gocd.io/binaries/16.2.1-3027/deb/go-agent-16.2.1-3027.deb'
+      )
     end
     it 'installs go-agent package from file' do
       expect(chef_run).to install_dpkg_package('go-agent')
@@ -242,7 +245,8 @@ describe 'gocd::agent' do
     it_behaves_like :agent_recipe_linux
     it 'downloads go-agent .rpm from remote URL' do
       expect(chef_run).to create_remote_file('go-agent-stable.noarch.rpm').with(
-        source: 'https://download.gocd.io/binaries/16.2.1-3027/rpm/go-agent-16.2.1-3027.noarch.rpm')
+        source: 'https://download.gocd.io/binaries/16.2.1-3027/rpm/go-agent-16.2.1-3027.noarch.rpm'
+      )
     end
     it 'installs go-agent package from file' do
       expect(chef_run).to install_rpm_package('go-agent')
@@ -259,7 +263,7 @@ describe 'gocd::agent' do
         node.normal['gocd']['agent']['go_server_url'] = 'https://localhost:8154/go'
         node.normal['gocd']['install_method'] = 'repository'
         node.normal['gocd']['repository']['apt']['uri'] = 'http://mydeb/repo'
-        node.normal['gocd']['repository']['apt']['components'] = [ '/' ]
+        node.normal['gocd']['repository']['apt']['components'] = ['/']
         node.normal['gocd']['repository']['apt']['keyserver'] = false
         node.normal['gocd']['repository']['apt']['key'] = false
       end
@@ -277,7 +281,8 @@ describe 'gocd::agent' do
         uri: 'http://mydeb/repo',
         keyserver: nil,
         key: nil,
-        components: ['/'])
+        components: ['/']
+      )
     end
     it 'installs go-agent package' do
       expect(chef_run).to install_package('go-agent')
@@ -288,7 +293,6 @@ describe 'gocd::agent' do
       chef_run.converge(described_recipe)
       expect(chef_run).to upgrade_package('go-agent')
     end
-
   end
   context 'When installing from custom repository and platform is centos' do
     let(:chef_run) do

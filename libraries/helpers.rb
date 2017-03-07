@@ -1,8 +1,9 @@
 require 'open-uri'
 
 module Gocd
+  # The helpers module is used for fetching os-related, server-related, agent-related information
   module Helpers
-    def fetch_content url
+    def fetch_content(url)
       open(url, 'r').read
     end
 
@@ -22,7 +23,7 @@ module Gocd
         server_search_query = node['gocd']['agent']['server_search_query']
         Chef::Log.info("Search query: #{server_search_query}")
         go_servers = search(:node, server_search_query)
-        if go_servers.count == 0
+        if go_servers.count.zero?
           Chef::Log.warn("No Go servers found on any of the nodes running chef client.")
         else
           go_server = go_servers.first
@@ -31,7 +32,7 @@ module Gocd
             Chef::Log.warn("Multiple Go servers found on Chef server. Using first returned server '#{values[:go_server_host]}' for server instance configuration.")
           end
           Chef::Log.info("Found Go server at ip address #{values[:go_server_host]} with automatic agent registration")
-          if values[:key] = go_server['gocd']['server']['autoregister_key']
+          if values[:key] == go_server['gocd']['server']['autoregister_key']
             Chef::Log.warn("Agent auto-registration enabled. This agent will not require approval to become active.")
           end
           values[:go_server_url] = "https://#{go_server}:#{values[:go_server_port]}/go"
@@ -106,15 +107,13 @@ module Gocd
       end
     end
 
-    def fetch_go_version_from_url url
+    def fetch_go_version_from_url(url)
       text = fetch_content url
-      if text.empty?
-        fail 'text is empty'
-      end
+      raise 'text is empty' if text.empty?
       parsed = JSON.parse(text)
-      fail 'Invalid format in version json file' unless parsed['message']
+      raise 'Invalid format in version json file' unless parsed['message']
       message = JSON.parse(parsed['message'])
-      return message['latest-version']
+      message['latest-version']
     end
 
     def package_extension
@@ -141,13 +140,13 @@ module Gocd
 
     def user_friendly_version(component)
       if node['gocd']['version']
-        return node['gocd']['version']
+        node['gocd']['version']
       elsif node['gocd'][component]['package_file']['url']
-        return 'custom'
+        'custom'
       elsif experimental?
-        return 'experimental'
+        'experimental'
       else
-        return 'stable'
+        'stable'
       end
     end
 
@@ -200,6 +199,7 @@ module Gocd
         "#{go_baseurl}/#{remote_version}/#{os_dir}/#{go_agent_remote_package_name}"
       end
     end
+
     def go_server_package_url
       if node['gocd']['server']['package_file']['url']
         # user specifed explictly the URL to download from
@@ -212,6 +212,7 @@ module Gocd
     def arch
       node['kernel']['machine'] =~ /x86_64/ ? 'amd64' : node['kernel']['machine']
     end
+
     def os
       node['os']
     end

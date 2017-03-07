@@ -2,27 +2,27 @@ actions :create, :delete
 
 default_action :create if defined?(default_action)
 
-property :service_action, :kind_of => [ Symbol, Array ], :required => false, :default => [:enable,:start]
+property :service_action, kind_of: [Symbol, Array], required: false, default: [:enable, :start]
 
-property :agent_name, :name_attribute => true, :kind_of => String, :required => false
+property :agent_name, name_attribute: true, kind_of: String, required: false
 
-property :user, :kind_of => String, :required => false, :default => 'go'
-property :group, :kind_of => String, :required => false, :default => 'go'
-property :go_server_url, :kind_of => String, :required => false, :default => nil
-property :go_server_host, :kind_of => String, :required => false, :default => nil # obsolete
-property :go_server_port, :kind_of => Integer, :required => false, :default => node['gocd']['agent']['go_server_port'] # obsolete
-property :daemon, :kind_of => [ TrueClass, FalseClass ], :required => false, :default => node['gocd']['agent']['daemon']
-property :vnc, :kind_of => [ TrueClass, FalseClass ], :required => false, :default => node['gocd']['agent']['vnc']['enabled']
-property :autoregister_key, :kind_of => String, :required => false, :default => nil
-property :autoregister_hostname, :kind_of => String, :required => false, :default => nil
-property :environments, :kind_of => [ String, Array ], :required => false, :default => nil
-property :resources, :kind_of => [ String, Array ], :required => false, :default => nil
-property :workspace, :kind_of => String, :required => false, :default => nil
-property :elastic_agent_id, :kind_of => [ String, nil ], :required => false, :default => nil
-property :elastic_agent_plugin_id, :kind_of => [ String, nil ], :required => false, :default => nil
+property :user, kind_of: String, required: false, default: 'go'
+property :group, kind_of: String, required: false, default: 'go'
+property :go_server_url, kind_of: String, required: false, default: nil
+property :go_server_host, kind_of: String, required: false, default: nil # obsolete
+property :go_server_port, kind_of: Integer, required: false, default: node['gocd']['agent']['go_server_port'] # obsolete
+property :daemon, kind_of: [TrueClass, FalseClass], required: false, default: node['gocd']['agent']['daemon']
+property :vnc, kind_of: [TrueClass, FalseClass], required: false, default: node['gocd']['agent']['vnc']['enabled']
+property :autoregister_key, kind_of: String, required: false, default: nil
+property :autoregister_hostname, kind_of: String, required: false, default: nil
+property :environments, kind_of: [String, Array], required: false, default: nil
+property :resources, kind_of: [String, Array], required: false, default: nil
+property :workspace, kind_of: String, required: false, default: nil
+property :elastic_agent_id, kind_of: [String, nil], required: false, default: nil
+property :elastic_agent_plugin_id, kind_of: [String, nil], required: false, default: nil
 
 action :create do
-  if node['gocd']['agent']['go_server_host'] != nil || node['gocd']['agent']['go_server_port'] != nil
+  if !node['gocd']['agent']['go_server_host'].nil? || !node['gocd']['agent']['go_server_port'].nil?
     log "Warn obsolete attributes" do
       message "Depreciation: node['gocd']['agent']['go_server_host'] and node['gocd']['agent']['go_server_port'] have been replaced by node['gocd']['agent']['go_server_url']"
       level :warn
@@ -36,13 +36,13 @@ action :create do
   log_directory = "/var/log/#{agent_name}"
   [workspace, log_directory].each do |d|
     directory d do
-      mode     0755
+      mode     0o755
       owner    new_resource.user
       group    new_resource.group
     end
   end
   directory "#{workspace}/config" do
-    mode     0700
+    mode     0o700
     owner    new_resource.user
     group    new_resource.group
   end
@@ -86,7 +86,7 @@ action :create do
       source 'golang-agent-init.erb'
       owner 'root'
       group 'root'
-      mode 0755
+      mode 0o755
       variables(agent_name: agent_name, autoregister_file: autoregister_file_path)
     end
   end
@@ -97,7 +97,7 @@ action :create do
     mode     "0644"
     owner    "root"
     group    "root"
-    notifies :restart,      "service[#{agent_name}]" if autoregister_values[:daemon]
+    notifies :restart, "service[#{agent_name}]" if autoregister_values[:daemon]
     variables autoregister_values
   end
 
@@ -111,7 +111,7 @@ action :create do
       resources new_resource.resources
       elastic_agent_id new_resource.elastic_agent_id
       elastic_agent_plugin_id new_resource.elastic_agent_plugin_id
-      not_if { ::File.exists? (proof_of_registration) }
+      not_if { ::File.exist? proof_of_registration }
       notifies :restart, "service[#{agent_name}]" if autoregister_values[:daemon]
     end
   end
@@ -119,12 +119,12 @@ action :create do
   case node['gocd']['agent']['type']
   when 'java'
     service agent_name do
-      supports :status => true, :restart => autoregister_values[:daemon], :start => true, :stop => true
+      supports status: true, restart: autoregister_values[:daemon], start: true, stop: true
       action   new_resource.service_action
     end
   when 'golang'
     service agent_name do
-      supports :restart => true, :start => true, :stop => true
+      supports restart: true, start: true, stop: true
       action   new_resource.service_action
     end
   end

@@ -12,3 +12,5 @@ Berksfile.lock
 # installed with `bundle install --binstubs`
 bin/
 
+.idea/
+vendor/bundle/

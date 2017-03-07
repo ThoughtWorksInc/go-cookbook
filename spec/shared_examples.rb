@@ -13,7 +13,8 @@ shared_examples_for :apt_repository_recipe do
       uri: 'https://download.gocd.io',
       keyserver: "pgp.mit.edu",
       key: "https://download.gocd.io/GOCD-GPG-KEY.asc",
-      components: ['/'])
+      components: ['/']
+    )
   end
   it 'adds gocd experimental apt repository if experimental flag is turned on' do
     chef_run.node.set['gocd']['use_experimental'] = true
@@ -22,7 +23,8 @@ shared_examples_for :apt_repository_recipe do
       uri: 'https://download.gocd.io/experimental',
       keyserver: "pgp.mit.edu",
       key: "https://download.gocd.io/GOCD-GPG-KEY.asc",
-      components: ['/'])
+      components: ['/']
+    )
   end
 end
 

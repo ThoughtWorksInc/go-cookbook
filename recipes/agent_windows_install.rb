@@ -1,4 +1,4 @@
-package_path = File.join(Chef::Config[:file_cache_path],go_agent_package_name)
+package_path = File.join(Chef::Config[:file_cache_path], go_agent_package_name)
 
 remote_file go_agent_package_name do
   path package_path

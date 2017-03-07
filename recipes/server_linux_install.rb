@@ -24,7 +24,7 @@ when 'package_file'
   remote_file go_server_package_name do
     path package_path
     source go_server_package_url
-    mode 0644
+    mode 0o644
   end
   case node['platform_family']
   when 'debian'
@@ -32,12 +32,12 @@ when 'package_file'
       source package_path
       notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
     end
-  when 'rhel','fedora'
+  when 'rhel', 'fedora'
     rpm_package 'go-server' do
       source package_path
       notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
     end
   end
 else
-  fail "Unknown install method - '#{node['gocd']['install_method']}'"
+  raise "Unknown install method - '#{node['gocd']['install_method']}'"
 end

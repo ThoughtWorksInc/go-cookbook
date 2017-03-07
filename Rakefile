@@ -1,9 +1,16 @@
 require 'foodcritic'
 require 'kitchen'
 require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
 
 # Style tests. Rubocop and Foodcritic
 namespace :style do
+  desc 'Run Ruby style checks'
+  RuboCop::RakeTask.new(:ruby) do |task|
+    task.options << '--display-cop-names'
+    # task.options << '--auto-correct' # -- use this option while running this task locally.
+  end
+
   desc 'Run Chef style checks'
   FoodCritic::Rake::LintTask.new(:chef) do |t|
     t.options = {
@@ -14,7 +21,7 @@ namespace :style do
 end
 
 desc 'Run all style checks'
-task style: ['style:chef']
+task style: ['style:ruby', 'style:chef']
 
 task unit: ['unit:chefspec']
 namespace 'unit' do
@@ -54,7 +61,7 @@ namespace :integration do
   task :cloud, :pattern do
     Kitchen.logger = Kitchen.default_file_logger
     @loader = Kitchen::Loader::YAML.new(project_config: './.kitchen.cloud.yml')
-    config = Kitchen::Config.new( loader: @loader)
+    config = Kitchen::Config.new(loader: @loader)
     config.instances.each do |instance|
       instance.test(:always)
     end
@@ -64,7 +71,7 @@ namespace :integration do
   task :openstack do
     Kitchen.logger = Kitchen.default_file_logger
     @loader = Kitchen::Loader::YAML.new(project_config: './.kitchen.openstack.yml')
-    config = Kitchen::Config.new( loader: @loader)
+    config = Kitchen::Config.new(loader: @loader)
     config.instances.each do |instance|
       instance.test(:always)
     end
@@ -74,7 +81,7 @@ namespace :integration do
   task :docker do
     Kitchen.logger = Kitchen.default_file_logger
     @loader = Kitchen::Loader::YAML.new(project_config: './.kitchen.docker.yml')
-    config = Kitchen::Config.new( loader: @loader)
+    config = Kitchen::Config.new(loader: @loader)
     config.instances.each do |instance|
       instance.test(:always)
     end
