@@ -7,7 +7,7 @@ end
 
 service (platform?('windows') ? 'Go Server' : 'go-server') do
   supports :status => true, :restart => true, :start => true, :stop => true
-  action [:enable, :start]
+  action [:enable]
   if node['gocd']['server']['wait_up']['retries'] != 0
     notifies :get, 'http_request[verify_go-server_comes_up]', :immediately
   end

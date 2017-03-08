@@ -2,7 +2,7 @@ actions :create, :delete
 
 default_action :create if defined?(default_action)
 
-property :service_action, :kind_of => [ Symbol, Array ], :required => false, :default => [:enable,:start]
+property :service_action, :kind_of => [ Symbol, Array ], :required => false, :default => [:enable]
 
 property :agent_name, :name_attribute => true, :kind_of => String, :required => false
 
