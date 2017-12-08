@@ -44,7 +44,7 @@ when 'java'
         source package_path
         notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
       end
-    when 'rhel', 'fedora'
+    when 'rhel', 'fedora', 'amazon'
       rpm_package 'go-agent' do
         source package_path
         notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately

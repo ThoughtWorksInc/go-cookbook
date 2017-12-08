@@ -26,7 +26,7 @@ when 'debian'
     key node['gocd']['repository']['apt']['key'] unless node['gocd']['repository']['apt']['key'] == false
   end
 
-when 'rhel', 'fedora'
+when 'rhel', 'fedora', 'amazon'
   include_recipe 'yum'
 
   yum_repository 'gocd' do

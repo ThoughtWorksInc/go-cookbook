@@ -43,7 +43,7 @@ when 'package_file'
       source package_path
       notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
     end
-  when 'rhel', 'fedora'
+  when 'rhel', 'fedora', 'amazon'
     rpm_package 'go-server' do
       source package_path
       notifies :reload, 'ohai[reload_passwd_for_go_user]', :immediately
