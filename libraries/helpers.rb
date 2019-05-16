@@ -129,14 +129,14 @@ module Gocd
 
     def package_extension
       value_for_platform_family('debian' => '.deb',
-                                %w(rhel fedora) => '.noarch.rpm',
+                                %w(rhel fedora amazon) => '.noarch.rpm',
                                 'windows' => '-setup.exe',
                                 'default' => '.zip')
     end
 
     def os_dir
       value_for_platform_family('debian' => 'deb',
-                                %w(rhel fedora) => 'rpm',
+                                %w(rhel fedora amazon) => 'rpm',
                                 'windows' => 'win',
                                 'default' => 'generic')
     end

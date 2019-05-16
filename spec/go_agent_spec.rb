@@ -140,6 +140,31 @@ describe 'gocd::agent' do
       expect(chef_run).to upgrade_package('go-agent')
     end
   end
+  context 'When all attributes are default and platform is amazon' do
+    let(:chef_run) do
+      run = ChefSpec::SoloRunner.new(step_into: 'gocd_agent') do |node|
+        node.automatic['platform_family'] = 'amazon'
+        node.automatic['platform'] = 'amazon'
+        node.automatic['os'] = 'linux'
+        node.normal['gocd']['agent']['go_server_url'] = 'https://localhost:8154/go'
+      end
+      run.converge(described_recipe)
+    end
+    before do
+      stub_command("grep -q '# Provides: go-agent$' /etc/init.d/go-agent").and_return(false)
+    end
+    it_behaves_like :agent_recipe_linux
+    it_behaves_like :yum_repository_recipe
+    it 'installs go-agent package' do
+      expect(chef_run).to install_package('go-agent')
+    end
+
+    it 'upgrades go-agent package if version is set to `latest`' do
+      chef_run.node.set['gocd']['version'] = 'latest'
+      chef_run.converge(described_recipe)
+      expect(chef_run).to upgrade_package('go-agent')
+    end
+  end
 
   context 'When many agents and all attributes are default and platform is debian' do
     let(:chef_run) do
@@ -264,6 +289,31 @@ describe 'gocd::agent' do
       expect(chef_run).to install_rpm_package('go-agent')
     end
   end
+  context 'When installing from package file and platform is amazon' do
+    let(:chef_run) do
+      run = ChefSpec::SoloRunner.new(step_into: 'gocd_agent') do |node|
+        node.automatic['platform_family'] = 'amazon'
+        node.automatic['platform'] = 'amazon'
+        node.automatic['os'] = 'linux'
+        node.normal['gocd']['agent']['go_server_url'] = 'https://localhost:8154/go'
+        node.normal['gocd']['install_method'] = 'package_file'
+      end
+      allow_any_instance_of(Chef::Resource::RemoteFile).to receive(:fetch_content)
+        .and_return('{"message": "{\"latest-version\": \"16.2.1-3027\"}"}')
+      run.converge(described_recipe)
+    end
+    before do
+      stub_command("grep -q '# Provides: go-agent$' /etc/init.d/go-agent").and_return(false)
+    end
+    it_behaves_like :agent_recipe_linux
+    it 'downloads go-agent .rpm from remote URL' do
+      expect(chef_run).to create_remote_file('go-agent-stable.noarch.rpm').with(
+        source: 'https://download.gocd.org/binaries/16.2.1-3027/rpm/go-agent-16.2.1-3027.noarch.rpm')
+    end
+    it 'installs go-agent package from file' do
+      expect(chef_run).to install_rpm_package('go-agent')
+    end
+  end
 
   context 'When installing from custom repository and platform is debian' do
     let(:chef_run) do
@@ -308,6 +358,42 @@ describe 'gocd::agent' do
       run = ChefSpec::SoloRunner.new(step_into: 'gocd_agent') do |node|
         node.automatic['platform_family'] = 'rhel'
         node.automatic['platform'] = 'centos'
+        node.automatic['os'] = 'linux'
+        node.normal['gocd']['agent']['go_server_url'] = 'https://localhost:8154/go'
+        node.normal['gocd']['install_method'] = 'repository'
+        node.normal['gocd']['repository']['yum']['baseurl'] = 'http://mycustom/gocd-rpm'
+      end
+      run.converge(described_recipe)
+    end
+    before do
+      stub_command("grep -q '# Provides: go-agent$' /etc/init.d/go-agent").and_return(false)
+    end
+    it_behaves_like :agent_recipe_linux
+    it 'includes yum recipe' do
+      expect(chef_run).to include_recipe('yum')
+    end
+    it 'adds my custom gocd yum repository' do
+      expect(chef_run).to create_yum_repository('gocd').with(
+        baseurl: 'http://mycustom/gocd-rpm',
+        gpgcheck: true
+      )
+    end
+
+    it 'installs go-agent package' do
+      expect(chef_run).to install_package('go-agent')
+    end
+
+    it 'upgrades go-agent package if version is set to `latest`' do
+      chef_run.node.set['gocd']['version'] = 'latest'
+      chef_run.converge(described_recipe)
+      expect(chef_run).to upgrade_package('go-agent')
+    end
+  end
+  context 'When installing from custom repository and platform is amazon' do
+    let(:chef_run) do
+      run = ChefSpec::SoloRunner.new(step_into: 'gocd_agent') do |node|
+        node.automatic['platform_family'] = 'amazon'
+        node.automatic['platform'] = 'amazon'
         node.automatic['os'] = 'linux'
         node.normal['gocd']['agent']['go_server_url'] = 'https://localhost:8154/go'
         node.normal['gocd']['install_method'] = 'repository'
